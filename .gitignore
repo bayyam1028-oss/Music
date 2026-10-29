@@ -1,0 +1,10 @@
+# Godot generated cache
+.godot/
+.import/
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+# Local exports
+build/
+dist/
