@@ -9,7 +9,7 @@ extends Node2D
 ## タイトル: ゲームスタート / 魚図鑑（釣った魚が記録され、端末に保存される）
 ## PC操作: マウス、または Space=押す・←→/A D=指の位置
 
-enum State { TITLE, AREAS, DEX, WORLD, SPOTS, JOURNAL, IDLE, CASTING, PLAY, GAMEOVER }
+enum State { TITLE, AREAS, DEX, WORLD, SPOTS, JOURNAL, SETTLEMENT, IDLE, CASTING, PLAY, GAMEOVER }
 
 @export var areas: Array[AreaData] = []   ## 釣り場のリスト（data/areas/*.tres）
 @export var music_offset := 0.0            ## 音ズレ補正（秒）。音が遅れて聞こえるなら + にする
@@ -28,6 +28,12 @@ const GRACE := 0.15        # 切り替え直後の猶予(秒)
 const MUSIC_VARIANTS := 2   # エリアごとの曲数（audio/<ID>_1_*.ogg, _2_*.ogg）
 const SAVE_PATH := "user://save.json"
 const RANK_VALUE := {"B": 1, "A": 2, "S": 3}
+const PART_BEATS := 16.0  # 4小節 (4/4) を最後まで演奏する
+const SETTLEMENTS := [
+	{"name": "潮風村", "kind": "村", "chapter": 0, "intro": "旅の始まり。師匠が釣りの基本を教えてくれる。", "tip": "港の釣り座で依頼を進めよう。"},
+	{"name": "清流町", "kind": "町", "chapter": 3, "intro": "川沿いの宿場町。釣り人と旅人が集う。", "tip": "上流・中流の魚を図鑑に登録しよう。"},
+	{"name": "水都みなと市", "kind": "市", "chapter": 6, "intro": "市場と運河を抱えた大きな水辺の都市。", "tip": "難しい水域に備えてリズムを磨こう。"}
+]
 # ルアーアクションのタップ位置（8分音符×8 = 1小節）
 # ルアーアクションのタップ位置（8分音符×8 = 1小節）。エリアの lure_style で選ぶ
 const LURE_SETS := [
@@ -89,6 +95,11 @@ var since_release := 0
 var last_x := 0.5
 var bite_queued := false
 var bite_t := -1.0
+var lure_part_start := 0.0
+var fight_part_start := 0.0
+var break_until := -1.0
+var catch_size := 1.0
+var settlement_index := 0
 
 # 状態
 var fighting := false
@@ -349,7 +360,7 @@ func _btn_rect(i: int, vp: Vector2, y0: float) -> Rect2:
 ## 画面タップがUI（ボタン）に使われたら true。true のときゲーム側の入力にはしない
 func _ui_press(pos: Vector2) -> bool:
 	var vp := get_viewport_rect().size
-	if state in [State.WORLD, State.SPOTS, State.JOURNAL]:
+	if state in [State.WORLD, State.SPOTS, State.JOURNAL, State.SETTLEMENT]:
 		_journey_press(pos)
 		return true
 	match state:
@@ -449,7 +460,7 @@ func _gameover_action(i: int) -> void:
 
 
 func _back_action() -> void:
-	if state == State.SPOTS or state == State.JOURNAL:
+	if state == State.SPOTS or state == State.JOURNAL or state == State.SETTLEMENT:
 		state = State.WORLD
 	elif state == State.WORLD:
 		_go_title()
@@ -601,6 +612,9 @@ func _start_play() -> void:
 	slides.clear()
 	releases.clear()
 	gen_beat = 2.0
+	lure_part_start = gen_beat * beat_len
+	fight_part_start = 0.0
+	break_until = -1.0
 	gen_mode = 0
 	bite_queued = false
 	bite_t = -1.0
@@ -623,6 +637,12 @@ func _play(delta: float) -> void:
 	_metronome()
 	if fighting:
 		_fight_update(delta)
+	elif break_until >= 0.0:
+		if song_t >= break_until:
+			break_until = -1.0
+			lure_part_start = gen_beat * beat_len
+		else:
+			appeal = 0.0
 	else:
 		_lure_update(delta)
 		if bite_t >= 0.0 and song_t >= bite_t:
@@ -639,7 +659,7 @@ func _play(delta: float) -> void:
 func _generate() -> void:
 	while gen_beat * beat_len - song_t < lead + 1.0:
 		if gen_mode == 0:
-			if bite_queued:
+			if bite_queued and gen_beat * beat_len >= lure_part_start + PART_BEATS * beat_len:
 				# HIT!! マーカーを置いて、その後ろからファイト譜面
 				bite_t = gen_beat * beat_len
 				gen_beat += 1.0
@@ -648,6 +668,9 @@ func _generate() -> void:
 				since_release = 0
 				bite_queued = false
 			else:
+				if break_until >= 0.0 and gen_beat * beat_len < break_until:
+					gen_beat += 4.0
+					continue
 				var pats: Array = LURE_SETS[area.lure_style]
 				var pat: Array = pats[randi() % pats.size()]
 				for i in 8:
@@ -749,6 +772,7 @@ func _lure_tap(idle: bool) -> void:
 
 func _begin_fight() -> void:
 	fighting = true
+	fight_part_start = song_t
 	progress = 0.0
 	tension = 0.0
 	slide_on = 0.0
@@ -818,7 +842,7 @@ func _fight_update(delta: float) -> void:
 			if absf(finger_x - cur_target) <= _tol():
 				on_path = true
 				rate = 0.15 * pull
-				progress += prog_rate * delta
+				progress = minf(1.0, progress + prog_rate * delta)
 				slide_on += delta
 			else:
 				rate = 0.35 * pull
@@ -839,7 +863,7 @@ func _fight_update(delta: float) -> void:
 		_game_over()
 		return
 	# 引き寄せが満タンになった瞬間に釣り上げ → すぐルアーのリズムへ戻る
-	if progress >= 1.0:
+	if progress >= 1.0 and song_t - fight_part_start >= PART_BEATS * beat_len:
 		_catch()
 
 
@@ -848,17 +872,20 @@ func _catch() -> void:
 	var rel := float(rel_ok) / maxi(rel_seen, 1)
 	var score := 0.7 * acc + 0.3 * rel
 	var rank := "S" if score >= 0.85 else ("A" if score >= 0.65 else "B")
+	# 同じ魚種でも精度でサイズが変わる。B=小型、S=大型
+	catch_size = snappedf(current_fish.size * (0.75 + 0.75 * clampf(score, 0.0, 1.0)), 0.01)
 	chain += 1
 	var mult := 1.0 + 0.5 * score + 0.1 * minf(chain - 1.0, 10.0)
 	var gain := int(round(current_fish.price * mult))
 	money += gain
 	caught_total += 1
-	var msg := "%s を釣った！ ランク%s  +%d円" % [current_fish.fish_name, rank, gain]
+	var msg := "%s を釣った！ サイズ %.2f  ランク%s  +%d円" % [current_fish.fish_name, catch_size, rank, gain]
 	if chain >= 2:
 		msg += "  %d連続！" % chain
 	var entry: Dictionary = dex.get(current_fish.fish_name, {})
 	var old_count := int(entry.get("count", 0))
 	entry["count"] = old_count + 1
+	entry["best_size"] = maxf(float(entry.get("best_size", 0.0)), catch_size)
 	if RANK_VALUE[rank] > RANK_VALUE.get(String(entry.get("best", "")), 0):
 		entry["best"] = rank
 	dex[current_fish.fish_name] = entry
@@ -881,8 +908,10 @@ func _fight_over(msg: String) -> void:
 	bite_t = -1.0
 	bite_queued = false
 	gen_mode = 0
-	gen_beat = ceil(song_t / beat_len) + 2.0
-	appeal = minf(0.35 + 0.1 * chain, 0.8)
+	gen_beat = ceil(song_t / (4.0 * beat_len)) * 4.0 + 4.0
+	break_until = gen_beat * beat_len
+	lure_part_start = break_until
+	appeal = 0.0
 	progress = 0.0
 	tension = 0.0
 	cur_target = -1.0
@@ -969,6 +998,8 @@ func _hint() -> String:
 		return message
 	if fighting:
 		return "ラインをなぞれ！ 切れたら終わり！ 赤い帯は指を離す"
+	if break_until >= 0.0:
+		return "CATCH!  次の小節からルアーアクション"
 	if bite_queued or bite_t >= 0.0:
 		return "来るぞ…！ 構えろ！"
 	return "リズムでタップ！ ルアーを動かして誘え"
@@ -977,7 +1008,7 @@ func _hint() -> String:
 func _draw() -> void:
 	var vp := get_viewport_rect().size
 	var w := vp.x
-	if state in [State.WORLD, State.SPOTS, State.JOURNAL]:
+	if state in [State.WORLD, State.SPOTS, State.JOURNAL, State.SETTLEMENT]:
 		_draw_journey(vp)
 		return
 	if state == State.DEX:
@@ -1094,6 +1125,7 @@ func _draw_dex(vp: Vector2) -> void:
 				draw_arc(cp, 7, 0, TAU, 16, Color(1, 1, 1, 0.4), 2.0)
 		_text("生息: " + _habitat(f), Vector2(250, y + 124), 20, Color(0.6, 0.85, 1.0, 0.9), -1.0)
 		if caught:
+			_text("最大サイズ %.2f" % float(entry.get("best_size", 0.0)), Vector2(250, y + 178), 19, Color.LIGHT_BLUE, -1.0)
 			_text(f.description, Vector2(250, y + 154), 22, Color(1, 1, 1, 0.85), -1.0)
 	draw_rect(Rect2(0, 0, w, top), Color(0.06, 0.14, 0.24))
 	draw_line(Vector2(0, top), Vector2(w, top), Color(1, 1, 1, 0.3), 2.0)
@@ -1448,6 +1480,13 @@ func _journey_press(pos: Vector2) -> void:
 		_back_action()
 		return
 	if state == State.WORLD:
+		for j in SETTLEMENTS.size():
+			var sr := Rect2(30.0 + j * (vp.x - 60.0) / 3.0, 1020, (vp.x - 60.0) / 3.0 - 8.0, 84)
+			if sr.has_point(pos):
+				if chapter >= int(SETTLEMENTS[j]["chapter"]):
+					settlement_index = j
+					state = State.SETTLEMENT
+				return
 		if Rect2(vp.x - 190, 20, 170, 65).has_point(pos):
 			state = State.JOURNAL
 			return
@@ -1458,6 +1497,9 @@ func _journey_press(pos: Vector2) -> void:
 				spot_index = 0
 				state = State.SPOTS
 				return
+	elif state == State.SETTLEMENT:
+		if Rect2(50, 990, vp.x - 100, 100).has_point(pos):
+			state = State.WORLD
 	elif state == State.SPOTS:
 		for i in 3:
 			if pos.distance_to(_spot_point(i, vp)) < 65:
@@ -1468,22 +1510,57 @@ func _journey_press(pos: Vector2) -> void:
 
 func _draw_journey(vp: Vector2) -> void:
 	var w := vp.x
-	draw_rect(Rect2(Vector2.ZERO, vp), Color("101f30"))
+	draw_rect(Rect2(Vector2.ZERO, vp), Color("233d34"))
+	# RPG風のフィールド: 草原、山、湖、街道。すべてコード描画。
+	for yy in range(220, 990, 45):
+		for xx in range(12, int(w), 48):
+			var seedv := (xx * 17 + yy * 31) % 13
+			var c := Color("406f45") if seedv < 7 else Color("56814c")
+			draw_rect(Rect2(xx, yy, 46, 43), c)
+			if seedv == 1:
+				_poly([Vector2(xx + 8, yy + 33), Vector2(xx + 24, yy + 5), Vector2(xx + 39, yy + 33)], Color("798a76"))
+			elif seedv == 2:
+				draw_circle(Vector2(xx + 22, yy + 22), 12, Color("28543d"))
+	# 水路と道がエリアをつなぐ
+	var stream_pts := PackedVector2Array([Vector2(w * 0.89, 240), Vector2(w * 0.67, 370), Vector2(w * 0.85, 520), Vector2(w * 0.62, 680), Vector2(w * 0.83, 930)])
+	draw_polyline(stream_pts, Color("448caf"), 48, true)
 	_button(Rect2(20, 20, 160, 65), "← 戻る", false)
 	if state == State.WORLD:
 		_button(Rect2(w - 190, 20, 170, 65), "冒険手帳", false)
 		_ctext("水のうたをたどる旅", 0, w, 150, 38, Color.WHITE)
 		_ctext("釣り場を選んで、各地の依頼を達成しよう", 0, w, 205, 24, Color.LIGHT_BLUE)
 		for i in range(areas.size() - 1):
-			draw_line(_map_point(i, vp), _map_point(i + 1, vp), Color("36596b"), 10)
+			draw_line(_map_point(i, vp), _map_point(i + 1, vp), Color("b8a273"), 19)
+			draw_line(_map_point(i, vp), _map_point(i + 1, vp), Color("e1ce9b"), 9)
 		for i in areas.size():
 			var pt := _map_point(i, vp)
 			var unlocked := i <= chapter
-			draw_circle(pt, 34, Color("e0b75b") if unlocked else Color("34404d"))
+			draw_circle(pt, 37, Color("e0b75b") if unlocked else Color("34404d"))
+			draw_arc(pt, 40, 0, TAU, 32, Color("fff1c9") if unlocked else Color("65747a"), 3)
 			_ctext(str(i + 1), pt.x - 30, 60, pt.y + 10, 28, Color.BLACK)
 			_ctext(areas[i].area_name if unlocked else "未踏の地", pt.x - 110, 220, pt.y + 64, 25, Color.WHITE)
-		_ctext("金色の地点をタップしてエリアへ", 0, w, 1120, 26, Color.LIGHT_BLUE)
+		for j in SETTLEMENTS.size():
+			var v: Dictionary = SETTLEMENTS[j]
+			var opened := chapter >= int(v["chapter"])
+			var sr := Rect2(30.0 + j * (w - 60.0) / 3.0, 1020, (w - 60.0) / 3.0 - 8.0, 84)
+			draw_rect(sr, Color("936e43") if opened else Color("404b4c"))
+			_poly([Vector2(sr.position.x + 12, sr.position.y + 18), Vector2(sr.position.x + sr.size.x * 0.5, sr.position.y - 15), Vector2(sr.end.x - 12, sr.position.y + 18)], Color("bd604c") if opened else Color("44494a"))
+			_ctext(str(v["name"]) if opened else "未解放", sr.position.x, sr.size.x, sr.position.y + 57, 21, Color.WHITE)
+		_ctext("金色の地点で釣り場 / 建物で村・町・市へ", 0, w, 1140, 24, Color.WHITE)
 		_ctext("冒険手帳で現在の依頼を確認", 0, w, 1180, 24, Color.WHITE)
+	elif state == State.SETTLEMENT:
+		var village: Dictionary = SETTLEMENTS[settlement_index]
+		_ctext(str(village["kind"]) + "  " + str(village["name"]), 0, w, 175, 45, Color.WHITE)
+		for house in 5:
+			var hx := 65.0 + house * (w - 125.0) / 5.0
+			var hy := 440.0 + float(house % 2) * 105.0
+			draw_rect(Rect2(hx, hy, 95, 90), Color("d8bc8b"))
+			_poly([Vector2(hx - 10, hy), Vector2(hx + 47, hy - 60), Vector2(hx + 105, hy)], Color("a24f43"))
+			draw_rect(Rect2(hx + 32, hy + 48, 28, 42), Color("6f5039"))
+		_ctext(str(village["intro"]), 20, w - 40, 730, 24, Color.WHITE)
+		_ctext(str(village["tip"]), 20, w - 40, 810, 25, Color("f5df9c"))
+		_ctext("拠点を訪問中 / 次の目的地は冒険手帳を確認", 20, w - 40, 905, 21, Color.LIGHT_BLUE)
+		_button(Rect2(50, 990, w - 100, 100), "フィールドへ戻る", true)
 	elif state == State.SPOTS:
 		_ctext(area.area_name + " / 釣り座MAP", 0, w, 150, 38, Color.WHITE)
 		_ctext("釣り座を選択 → キャスティング開始", 0, w, 210, 25, Color.LIGHT_BLUE)
