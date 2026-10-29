@@ -29,3 +29,9 @@ godot --headless --path . --script res://tests/journey_test.gd
 ### GitHubへの移行状況
 
 このリポジトリには **Godot設定・メインシーン・魚／エリア／ストーリーデータ定義（5ファイル）を登録済み** です。ただし、実行に必要な `scripts/main.gd`、魚・エリアの `.tres` と音源 `.ogg` はまだ未登録のため、**現状のGitHubリポジトリ単体では起動できません**。ZIPの全データ移行・Godot実機検証は未完了です。
+
+## 自動検証・ZIP生成
+
+`.github/workflows/validate-and-package.yml` を追加しました。全ソース・全素材をGitHubに登録した後、GitHub ActionsでGodotインポートと `tests/journey_test.gd` を実行し、成功時には `fishing-rhythm-story` というダウンロード可能なArtifact（ZIP）を生成します。
+
+**現時点では元ZIPのうち、ゲーム本体 `main.gd`、エリア10ファイル、魚36ファイル、音声44ファイルなどが未登録です。自動検証は意図的に失敗します。** ソース全移行と実行検証が完了するまで、GitHub版を完成品として配布しません。
