@@ -103,9 +103,9 @@ var settlement_index := 0
 var npc_text := ""
 var npc_timer := 0.0
 const TOWN_NPCS := [
-	[["村長", "土肥中村へようこそ。"], ["釣り師", "拍を最後まで聞くのがコツだ。"], ["怪しい旅人", "夜の水音には秘密がある。"]],
+	[["夏村ヨウ", "はじめまして！ 一緒に釣りに行こうよ！"], ["村長", "土肥中村へようこそ。"], ["釣り師", "拍を最後まで聞くのがコツだ。"], ["怪しい旅人", "夜の水音には秘密がある。"]],
 	[["宿屋の主人", "戸鳴町へようこそ。"], ["行商人", "川の魚は珍しいよ。"], ["不審な男", "橋の下を調べるな……。"]],
-	[["市場の店員", "みなと市の市場は大忙し。"], ["船乗り", "潮のリズムを読むんだ。"], ["謎の人物", "地図にない水路がある。"]]
+	[["冬市ミツキ", "みなと市へようこそ。釣りの腕前、見せてくれる？"], ["市場の店員", "みなと市の市場は大忙し。"], ["船乗り", "潮のリズムを読むんだ。"], ["謎の人物", "地図にない水路がある。"]]
 ]
 const AREA_STRANGERS := [
 	"桟橋の先には行くな。", "滝の裏から音がする。", "流れてきた箱を見たか？",
@@ -1514,8 +1514,9 @@ func _journey_press(pos: Vector2) -> void:
 				state = State.SPOTS
 				return
 	elif state == State.SETTLEMENT:
-		for n in 3:
-			if pos.distance_to(Vector2(vp.x * [0.2, 0.5, 0.8][n], 650)) < 65:
+		for n in TOWN_NPCS[settlement_index].size():
+			var npc_count: int = TOWN_NPCS[settlement_index].size()
+			if pos.distance_to(Vector2(vp.x * float(n + 1) / float(npc_count + 1), 650)) < 65:
 				npc_text = str(TOWN_NPCS[settlement_index][n][0]) + "「" + str(TOWN_NPCS[settlement_index][n][1]) + "」"
 				npc_timer = 8.0
 				return
@@ -1598,8 +1599,9 @@ func _draw_journey(vp: Vector2) -> void:
 			draw_rect(Rect2(hx, hy, 95, 90), Color("d8bc8b"))
 			_poly([Vector2(hx - 10, hy), Vector2(hx + 47, hy - 60), Vector2(hx + 105, hy)], Color("a24f43"))
 			draw_rect(Rect2(hx + 32, hy + 48, 28, 42), Color("6f5039"))
-		for n in 3:
-			_draw_npc(Vector2(w * [0.2, 0.5, 0.8][n], 650), str(TOWN_NPCS[settlement_index][n][0]), n == 2)
+		for n in TOWN_NPCS[settlement_index].size():
+			var npc_count: int = TOWN_NPCS[settlement_index].size()
+			_draw_npc(Vector2(w * float(n + 1) / float(npc_count + 1), 650), str(TOWN_NPCS[settlement_index][n][0]), n == npc_count - 1)
 		_ctext("人物をタップして話す", 0, w, 270, 25, Color.WHITE)
 		_ctext(str(village["intro"]), 20, w - 40, 730, 24, Color.WHITE)
 		_ctext(str(village["tip"]), 20, w - 40, 810, 25, Color("f5df9c"))
