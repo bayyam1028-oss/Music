@@ -1,0 +1,18 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/area_data.gd" id="2"]
+[ext_resource type="Resource" path="res://data/areas/harbor.tres" id="3"]
+[ext_resource type="Resource" path="res://data/areas/upstream.tres" id="4"]
+[ext_resource type="Resource" path="res://data/areas/midstream.tres" id="5"]
+[ext_resource type="Resource" path="res://data/areas/downstream.tres" id="6"]
+[ext_resource type="Resource" path="res://data/areas/estuary.tres" id="7"]
+[ext_resource type="Resource" path="res://data/areas/stream.tres" id="8"]
+[ext_resource type="Resource" path="res://data/areas/swamp.tres" id="9"]
+[ext_resource type="Resource" path="res://data/areas/pond.tres" id="10"]
+[ext_resource type="Resource" path="res://data/areas/lake.tres" id="11"]
+[ext_resource type="Resource" path="res://data/areas/paddy.tres" id="12"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1")
+areas = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8"), ExtResource("9"), ExtResource("10"), ExtResource("11"), ExtResource("12")])
