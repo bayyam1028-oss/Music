@@ -30,9 +30,9 @@ const SAVE_PATH := "user://save.json"
 const RANK_VALUE := {"B": 1, "A": 2, "S": 3}
 const PART_BEATS := 16.0  # 4小節 (4/4) を最後まで演奏する
 const SETTLEMENTS := [
-	{"name": "潮風村", "kind": "村", "chapter": 0, "intro": "旅の始まり。師匠が釣りの基本を教えてくれる。", "tip": "港の釣り座で依頼を進めよう。"},
-	{"name": "清流町", "kind": "町", "chapter": 3, "intro": "川沿いの宿場町。釣り人と旅人が集う。", "tip": "上流・中流の魚を図鑑に登録しよう。"},
-	{"name": "水都みなと市", "kind": "市", "chapter": 6, "intro": "市場と運河を抱えた大きな水辺の都市。", "tip": "難しい水域に備えてリズムを磨こう。"}
+	{"name": "土肥中村", "kind": "村", "chapter": 0, "intro": "旅の始まり。師匠が釣りの基本を教えてくれる。", "tip": "港の釣り座で依頼を進めよう。"},
+	{"name": "戸鳴町", "kind": "町", "chapter": 3, "intro": "川沿いの宿場町。釣り人と旅人が集う。", "tip": "上流・中流の魚を図鑑に登録しよう。"},
+	{"name": "みなと市", "kind": "市", "chapter": 6, "intro": "市場と運河を抱えた大きな水辺の都市。", "tip": "難しい水域に備えてリズムを磨こう。"}
 ]
 # ルアーアクションのタップ位置（8分音符×8 = 1小節）
 # ルアーアクションのタップ位置（8分音符×8 = 1小節）。エリアの lure_style で選ぶ
@@ -100,6 +100,19 @@ var fight_part_start := 0.0
 var break_until := -1.0
 var catch_size := 1.0
 var settlement_index := 0
+var npc_text := ""
+var npc_timer := 0.0
+const TOWN_NPCS := [
+	[["村長", "土肥中村へようこそ。"], ["釣り師", "拍を最後まで聞くのがコツだ。"], ["怪しい旅人", "夜の水音には秘密がある。"]],
+	[["宿屋の主人", "戸鳴町へようこそ。"], ["行商人", "川の魚は珍しいよ。"], ["不審な男", "橋の下を調べるな……。"]],
+	[["市場の店員", "みなと市の市場は大忙し。"], ["船乗り", "潮のリズムを読むんだ。"], ["謎の人物", "地図にない水路がある。"]]
+]
+const AREA_STRANGERS := [
+	"桟橋の先には行くな。", "滝の裏から音がする。", "流れてきた箱を見たか？",
+	"川底に秘密がある。", "潮が引いたら印を探せ。", "ここで聞いたことは話すな。",
+	"沼の声に返事をするな。", "池の底に光が見える。", "夜の湖に船がいる。",
+	"用水路の先を追うな。"
+]
 
 # 状態
 var fighting := false
@@ -555,6 +568,7 @@ func _dex_found() -> int:
 
 func _process(delta: float) -> void:
 	time += delta
+	npc_timer = maxf(npc_timer - delta, 0.0)
 	judge_t = maxf(judge_t - delta, 0.0)
 	_music_mix(delta)
 	var dir := int(Input.is_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_D)) \
@@ -1500,15 +1514,40 @@ func _journey_press(pos: Vector2) -> void:
 				state = State.SPOTS
 				return
 	elif state == State.SETTLEMENT:
+		for n in 3:
+			if pos.distance_to(Vector2(vp.x * [0.2, 0.5, 0.8][n], 650)) < 65:
+				npc_text = str(TOWN_NPCS[settlement_index][n][0]) + "「" + str(TOWN_NPCS[settlement_index][n][1]) + "」"
+				npc_timer = 8.0
+				return
 		if Rect2(50, 990, vp.x - 100, 100).has_point(pos):
 			state = State.WORLD
 	elif state == State.SPOTS:
+		if pos.distance_to(Vector2(vp.x * 0.84, 295)) < 65:
+			npc_text = "不審者「" + AREA_STRANGERS[mini(maxi(areas.find(area), 0), 9)] + "」"
+			npc_timer = 8.0
+			return
 		for i in 3:
 			if pos.distance_to(_spot_point(i, vp)) < 65:
 				spot_index = i
 				return
 		if Rect2(60, 1110, vp.x - 120, 90).has_point(pos):
 			_start_game()
+
+func _draw_npc(at: Vector2, name: String, suspicious: bool) -> void:
+	draw_circle(at + Vector2(0, -36), 20, Color("f2c79b"))
+	draw_rect(Rect2(at.x - 18, at.y - 14, 36, 48), Color("4c354d") if suspicious else Color("487b92"))
+	draw_line(at + Vector2(-10, 34), at + Vector2(-16, 60), Color("27313d"), 8)
+	draw_line(at + Vector2(10, 34), at + Vector2(16, 60), Color("27313d"), 8)
+	if suspicious:
+		draw_rect(Rect2(at.x - 25, at.y - 53, 50, 8), Color("22232d"))
+		draw_rect(Rect2(at.x - 17, at.y - 68, 34, 15), Color("22232d"))
+	_ctext(name, at.x - 95, 190, at.y + 90, 21, Color("ffe6a1") if suspicious else Color.WHITE)
+
+func _npc_dialogue(vp: Vector2) -> void:
+	if npc_timer <= 0.0:
+		return
+	draw_rect(Rect2(24, 1100, vp.x - 48, 125), Color("10202b"))
+	_ctext(npc_text, 32, vp.x - 64, 1170, 19, Color.WHITE)
 
 func _draw_journey(vp: Vector2) -> void:
 	var w := vp.x
@@ -1559,11 +1598,16 @@ func _draw_journey(vp: Vector2) -> void:
 			draw_rect(Rect2(hx, hy, 95, 90), Color("d8bc8b"))
 			_poly([Vector2(hx - 10, hy), Vector2(hx + 47, hy - 60), Vector2(hx + 105, hy)], Color("a24f43"))
 			draw_rect(Rect2(hx + 32, hy + 48, 28, 42), Color("6f5039"))
+		for n in 3:
+			_draw_npc(Vector2(w * [0.2, 0.5, 0.8][n], 650), str(TOWN_NPCS[settlement_index][n][0]), n == 2)
+		_ctext("人物をタップして話す", 0, w, 270, 25, Color.WHITE)
 		_ctext(str(village["intro"]), 20, w - 40, 730, 24, Color.WHITE)
 		_ctext(str(village["tip"]), 20, w - 40, 810, 25, Color("f5df9c"))
 		_ctext("拠点を訪問中 / 次の目的地は冒険手帳を確認", 20, w - 40, 905, 21, Color.LIGHT_BLUE)
 		_button(Rect2(50, 990, w - 100, 100), "フィールドへ戻る", true)
+		_npc_dialogue(vp)
 	elif state == State.SPOTS:
+		_draw_npc(Vector2(w * 0.84, 295), "不審者", true)
 		_ctext(area.area_name + " / 釣り座MAP", 0, w, 150, 38, Color.WHITE)
 		_ctext("釣り座を選択 → キャスティング開始", 0, w, 210, 25, Color.LIGHT_BLUE)
 		draw_rect(Rect2(35, 270, w - 70, 560), area.ground_color.darkened(0.3))
@@ -1583,6 +1627,7 @@ func _draw_journey(vp: Vector2) -> void:
 		_ctext(" / ".join(names), 20, w - 40, 990, 26, Color.WHITE)
 		_ctext("長押しして離すとキャスト。魚はこの釣り座から抽選", 0, w, 1050, 21, Color.LIGHT_BLUE)
 		_button(Rect2(60, 1110, w - 120, 90), "ここで釣りを始める", true)
+		_npc_dialogue(vp)
 	else:
 		_ctext("冒険手帳", 0, w, 155, 44, Color.WHITE)
 		_ctext("水辺の音が消えかけた村。", 0, w, 260, 28, Color.WHITE)
