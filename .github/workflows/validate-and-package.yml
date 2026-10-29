@@ -1,0 +1,47 @@
+name: Validate and package Fishing Rhythm
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check required sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in fishing_game/project.godot fishing_game/main.tscn fishing_game/scripts/main.gd fishing_game/scripts/area_data.gd fishing_game/scripts/fish_data.gd fishing_game/scripts/journey_data.gd fishing_game/tests/journey_test.gd; do
+            test -s "$f" || { echo "::error file=$f::Required project file missing"; exit 1; }
+          done
+          test "$(find fishing_game/data/areas -name '*.tres' | wc -l)" -eq 10
+          test "$(find fishing_game/data/fish -name '*.tres' | wc -l)" -ge 30
+          test "$(find fishing_game/audio -name '*.ogg' | wc -l)" -ge 40
+      - name: Install Godot 4.6
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: 4.6.1
+          use-dotnet: false
+      - name: Isolated Godot import
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/godot-user
+        run: godot --headless --path fishing_game --editor --quit
+      - name: Execute journey smoke test
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/godot-user
+        run: godot --headless --path fishing_game --script res://tests/journey_test.gd
+      - name: Package playable project
+        if: success()
+        run: |
+          mkdir -p dist
+          zip -r dist/fishing_rhythm_story.zip fishing_game -x '*/.godot/*' '*.import' '*.tmp'
+      - name: Publish downloadable artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fishing-rhythm-story
+          path: dist/fishing_rhythm_story.zip
+          retention-days: 30
