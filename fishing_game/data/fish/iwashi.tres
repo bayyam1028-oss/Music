@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "イワシ"
+description = "群れで泳ぐ銀色の小魚"
+price = 5
+beats = 12
+note_density = 0.3
+release_beats = 1.0
+pull_strength = 0.5
+spawn_weight = 70.0
+color = Color(0.75, 0.8, 0.88, 1)
+size = 0.7

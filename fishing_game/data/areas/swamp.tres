@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="AreaData" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/area_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="2"]
+[ext_resource type="Resource" path="res://data/fish/bluegill.tres" id="3"]
+[ext_resource type="Resource" path="res://data/fish/funa.tres" id="4"]
+[ext_resource type="Resource" path="res://data/fish/bass.tres" id="5"]
+[ext_resource type="Resource" path="res://data/fish/dojo.tres" id="6"]
+[ext_resource type="Resource" path="res://data/fish/namazu.tres" id="7"]
+[ext_resource type="Resource" path="res://data/fish/raigyo.tres" id="8"]
+[ext_resource type="Resource" path="res://data/fish/unagi.tres" id="9"]
+
+[resource]
+script = ExtResource("1")
+area_name = "沼"
+description = "濁った水の底なし沼"
+feature = "先が見えにくい・主が潜む"
+scenery = "swamp"
+sky_color = Color(0.6, 0.68, 0.55, 1)
+water_color = Color(0.2, 0.3, 0.15, 1)
+ground_color = Color(0.3, 0.28, 0.2, 1)
+difficulty = 4
+bpm = 92
+lead = 1.0
+tol_scale = 1.1
+pull_scale = 1.1
+wobble_scale = 0.9
+release_scale = 1.6
+bite_rate = 0.6
+tide = 0.0
+lure_style = 0
+fish = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8"), ExtResource("9")])
+weights = PackedFloat32Array(50.0, 35.0, 35.0, 30.0, 25.0, 20.0, 8.0)

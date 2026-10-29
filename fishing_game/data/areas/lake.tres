@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="AreaData" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/area_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="2"]
+[ext_resource type="Resource" path="res://data/fish/wakasagi.tres" id="3"]
+[ext_resource type="Resource" path="res://data/fish/herabuna.tres" id="4"]
+[ext_resource type="Resource" path="res://data/fish/bass.tres" id="5"]
+[ext_resource type="Resource" path="res://data/fish/nijimasu.tres" id="6"]
+[ext_resource type="Resource" path="res://data/fish/bluegill.tres" id="7"]
+[ext_resource type="Resource" path="res://data/fish/koi.tres" id="8"]
+[ext_resource type="Resource" path="res://data/fish/itou.tres" id="9"]
+
+[resource]
+script = ExtResource("1")
+area_name = "湖"
+description = "広大で深い湖"
+feature = "遠くまで見える・風で揺れる"
+scenery = "lake"
+sky_color = Color(0.72, 0.86, 0.98, 1)
+water_color = Color(0.1, 0.32, 0.55, 1)
+ground_color = Color(0.5, 0.45, 0.38, 1)
+difficulty = 3
+bpm = 112
+lead = 1.7
+tol_scale = 1.0
+pull_scale = 1.1
+wobble_scale = 0.85
+release_scale = 1.2
+bite_rate = 1.0
+tide = 0.2
+lure_style = 1
+fish = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8"), ExtResource("9")])
+weights = PackedFloat32Array(60.0, 30.0, 30.0, 25.0, 25.0, 20.0, 3.0)

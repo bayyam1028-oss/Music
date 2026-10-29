@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "ワカサギ"
+description = "氷の下でも釣れる"
+price = 6
+beats = 17
+note_density = 0.5
+release_beats = 1.0
+pull_strength = 0.7
+spawn_weight = 55.0
+color = Color(0.8, 0.85, 0.9, 1)
+size = 0.6

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "ドジョウ"
+description = "泥の中でニョロニョロ"
+price = 5
+beats = 16
+note_density = 0.48
+release_beats = 1.0
+pull_strength = 0.6
+spawn_weight = 50.0
+color = Color(0.55, 0.5, 0.35, 1)
+size = 0.6

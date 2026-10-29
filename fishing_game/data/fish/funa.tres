@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "フナ"
+description = "釣りはフナに始まる"
+price = 7
+beats = 18
+note_density = 0.51
+release_beats = 1.0
+pull_strength = 0.7
+spawn_weight = 60.0
+color = Color(0.55, 0.55, 0.4, 1)
+size = 0.9

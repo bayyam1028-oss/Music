@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "イトウ"
+description = "幻の大怪魚"
+price = 800
+beats = 34
+note_density = 0.98
+release_beats = 1.5
+pull_strength = 1.6
+spawn_weight = 2.0
+color = Color(0.5, 0.35, 0.3, 1)
+size = 2.5

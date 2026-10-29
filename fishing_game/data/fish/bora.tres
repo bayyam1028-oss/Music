@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "ボラ"
+description = "ジャンプが得意"
+price = 25
+beats = 22
+note_density = 0.63
+release_beats = 1.0
+pull_strength = 0.9
+spawn_weight = 35.0
+color = Color(0.55, 0.6, 0.55, 1)
+size = 1.1

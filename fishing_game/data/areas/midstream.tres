@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="AreaData" load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/area_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="2"]
+[ext_resource type="Resource" path="res://data/fish/oikawa.tres" id="3"]
+[ext_resource type="Resource" path="res://data/fish/kawamutsu.tres" id="4"]
+[ext_resource type="Resource" path="res://data/fish/ugui.tres" id="5"]
+[ext_resource type="Resource" path="res://data/fish/ayu.tres" id="6"]
+[ext_resource type="Resource" path="res://data/fish/nigoi.tres" id="7"]
+[ext_resource type="Resource" path="res://data/fish/nijimasu.tres" id="8"]
+[ext_resource type="Resource" path="res://data/fish/namazu.tres" id="9"]
+
+[resource]
+script = ExtResource("1")
+area_name = "川中流"
+description = "ゆったり流れる中流域"
+feature = "魚種が豊富で釣れやすい"
+scenery = "midstream"
+sky_color = Color(0.68, 0.85, 0.95, 1)
+water_color = Color(0.25, 0.5, 0.55, 1)
+ground_color = Color(0.4, 0.5, 0.3, 1)
+difficulty = 2
+bpm = 124
+lead = 1.4
+tol_scale = 1.0
+pull_scale = 0.95
+wobble_scale = 1.0
+release_scale = 1.0
+bite_rate = 1.2
+tide = 0.0
+lure_style = 1
+fish = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8"), ExtResource("9")])
+weights = PackedFloat32Array(55.0, 45.0, 35.0, 25.0, 15.0, 12.0, 5.0)

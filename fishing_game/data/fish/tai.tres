@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "マダイ"
+description = "お祝いの席の主役"
+price = 50
+beats = 24
+note_density = 0.6
+release_beats = 1.0
+pull_strength = 1.0
+spawn_weight = 30.0
+color = Color(0.95, 0.45, 0.5, 1)
+size = 1.3

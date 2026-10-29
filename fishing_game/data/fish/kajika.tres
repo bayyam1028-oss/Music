@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "カジカ"
+description = "川底に潜む待ち伏せ屋"
+price = 40
+beats = 23
+note_density = 0.68
+release_beats = 1.0
+pull_strength = 1.0
+spawn_weight = 25.0
+color = Color(0.45, 0.4, 0.3, 1)
+size = 0.7

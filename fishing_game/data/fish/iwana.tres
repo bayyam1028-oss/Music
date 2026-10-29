@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "イワナ"
+description = "源流に潜む白斑の主"
+price = 100
+beats = 27
+note_density = 0.77
+release_beats = 1.0
+pull_strength = 1.2
+spawn_weight = 12.0
+color = Color(0.35, 0.4, 0.3, 1)
+size = 1.3

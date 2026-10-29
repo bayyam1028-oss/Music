@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "タナゴ"
+description = "二枚貝に卵を産む"
+price = 10
+beats = 19
+note_density = 0.54
+release_beats = 1.0
+pull_strength = 0.7
+spawn_weight = 30.0
+color = Color(0.8, 0.5, 0.7, 1)
+size = 0.6

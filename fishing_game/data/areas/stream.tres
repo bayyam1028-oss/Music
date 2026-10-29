@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="AreaData" load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/area_data.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="2"]
+[ext_resource type="Resource" path="res://data/fish/iwana.tres" id="3"]
+[ext_resource type="Resource" path="res://data/fish/yamame.tres" id="4"]
+[ext_resource type="Resource" path="res://data/fish/kajika.tres" id="5"]
+[ext_resource type="Resource" path="res://data/fish/nijimasu.tres" id="6"]
+[ext_resource type="Resource" path="res://data/fish/itou.tres" id="7"]
+
+[resource]
+script = ExtResource("1")
+area_name = "渓流"
+description = "岩場を駆ける急流"
+feature = "最速・ライン細め・上級者"
+scenery = "stream"
+sky_color = Color(0.55, 0.7, 0.75, 1)
+water_color = Color(0.15, 0.45, 0.5, 1)
+ground_color = Color(0.3, 0.32, 0.3, 1)
+difficulty = 5
+bpm = 148
+lead = 1.1
+tol_scale = 0.85
+pull_scale = 1.3
+wobble_scale = 1.5
+release_scale = 0.8
+bite_rate = 0.9
+tide = 0.0
+lure_style = 2
+fish = Array[ExtResource("2")]([ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7")])
+weights = PackedFloat32Array(45.0, 45.0, 30.0, 25.0, 2.0)

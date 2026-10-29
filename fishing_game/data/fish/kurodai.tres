@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "クロダイ"
+description = "チヌと呼ばれる強敵"
+price = 90
+beats = 26
+note_density = 0.76
+release_beats = 1.0
+pull_strength = 1.1
+spawn_weight = 18.0
+color = Color(0.25, 0.28, 0.32, 1)
+size = 1.3

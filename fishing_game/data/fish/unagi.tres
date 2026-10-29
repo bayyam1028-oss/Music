@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "ウナギ"
+description = "ぬるぬる高級魚"
+price = 350
+beats = 31
+note_density = 0.89
+release_beats = 1.5
+pull_strength = 1.4
+spawn_weight = 5.0
+color = Color(0.2, 0.2, 0.25, 1)
+size = 1.8

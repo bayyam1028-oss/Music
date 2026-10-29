@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "コイ"
+description = "池の主。長生きする"
+price = 100
+beats = 27
+note_density = 0.77
+release_beats = 1.0
+pull_strength = 1.2
+spawn_weight = 20.0
+color = Color(0.9, 0.5, 0.2, 1)
+size = 1.6

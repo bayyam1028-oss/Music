@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FishData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fish_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+fish_name = "ナマズ"
+description = "ヒゲが自慢の夜行性"
+price = 150
+beats = 28
+note_density = 0.81
+release_beats = 1.5
+pull_strength = 1.2
+spawn_weight = 15.0
+color = Color(0.3, 0.3, 0.35, 1)
+size = 1.6
