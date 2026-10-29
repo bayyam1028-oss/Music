@@ -1031,7 +1031,9 @@ func _draw() -> void:
 		draw_circle(bp, 11, Color(0.95, 0.2, 0.2))
 		draw_circle(bp + Vector2(0, -5), 6, Color.WHITE)
 	if state == State.PLAY and fighting and current_fish:
-		var s := current_fish.size
+		# 正確にラインを追うほど、ファイト中も魚の表示サイズが育つ
+		var performance := slide_on / maxf(slide_seen, 0.1)
+		var s := current_fish.size * (0.75 + 0.75 * clampf(performance, 0.0, 1.0))
 		var fp := bp + Vector2(0, 40)
 		draw_circle(fp, 20 * s, current_fish.color)
 		draw_colored_polygon(PackedVector2Array([
